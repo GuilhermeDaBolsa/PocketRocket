@@ -9,41 +9,27 @@ using namespace crow;
 using namespace controllers;
 
 int main() {
-
-    vector<int> numbers = vector<int>();
-    
     SimpleApp       app;
     UserController  userController;
 
-    CROW_ROUTE(app, "/")([&numbers]() {
-        numbers.emplace_back(numbers.size());
+    CROW_ROUTE(app, "/")([]() { return "Hello, world!"; });
+    
+    CROW_ROUTE(app, "/bomdia").methods("GET"_method)(&userController.Print);
+    CROW_ROUTE(app, "/signUp").methods("POST"_method)(&userController.SignUp);
+    CROW_WEBSOCKET_ROUTE(app, "/ws")
+        .onopen([&](crow::websocket::connection& conn){
+            //
+            cout << "close" << std::endl;
+        })
+        .onclose([&](crow::websocket::connection& conn, const std::string& reason){
+            // do_something();
+            cout << "close" << std::endl;
+        })
+        .onmessage([&](crow::websocket::connection& /*conn*/, const std::string& data, bool is_binary){
+            cout << "bomdia" << std::endl;
+        });
 
-        string t = "Hello World ";
-        for (int i = 0; i < numbers.size(); i++)
-            t.append(std::to_string(numbers[i]) + ", ");
-
-        return t;
-    });
-
-    CROW_ROUTE(app, "/bomdia")([&userController]() { return userController.print(); });
-
-    CROW_ROUTE(app, "/signUp").methods("POST"_method)([](const request& req) {
-        auto reqJson = json::load(req.body);
-
-        if (!reqJson)
-            return response(status::BAD_REQUEST, "Missing request body");
-        if (!reqJson.has("login") || reqJson["login"].t() != json::type::String)
-            return response(status::BAD_REQUEST, "Missing login");
-        if (!reqJson.has("password") || reqJson["password"].t() != json::type::String)
-            return response(status::BAD_REQUEST, "Missing password");
-
-        string login = reqJson["login"].s();
-        string password = reqJson["password"].s();
-        
-        return response(status::CREATED, "User not yet created with login " + login + " and password " + password);
-    });
-
-    app.port(18080).multithreaded().run();
+    app.port(8080).multithreaded().run();
 
     return 0;
 }
