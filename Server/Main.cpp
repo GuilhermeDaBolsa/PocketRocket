@@ -2,7 +2,7 @@
 #include <vector>
 #include <string>
 
-#include "./controllers/UserController.h"
+#include "./controllers/UserController.cpp"
 
 using namespace std;
 using namespace crow;
@@ -26,7 +26,7 @@ int main() {
     });
 
     CROW_ROUTE(app, "/bomdia")([&userController]() {
-        userController.printable();
+        userController.print();
 
         return "bomdia";
     });

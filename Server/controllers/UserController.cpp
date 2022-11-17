@@ -1,10 +1,13 @@
-#include "UserController.h"
 #include <iostream>
 
-using namespace controllers;
-using namespace std;
+namespace controllers {
 
-void UserController::printable()
-{
-    cout << "Doing something!" << endl;
+	class UserController {
+	public:
+
+		static void print() {
+			std::cout << "Doing something!" << std::endl;
+		}
+	};
+
 }
