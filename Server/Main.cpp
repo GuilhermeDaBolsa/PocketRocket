@@ -2,7 +2,7 @@
 #include <vector>
 #include <string>
 
-#include "./controllers/UserController.cpp"
+#include "./controllers/UserController.h"
 
 using namespace std;
 using namespace crow;
@@ -25,11 +25,7 @@ int main() {
         return t;
     });
 
-    CROW_ROUTE(app, "/bomdia")([&userController]() {
-        userController.print();
-
-        return "bomdia";
-    });
+    CROW_ROUTE(app, "/bomdia")([&userController]() { return userController.print(); });
 
     CROW_ROUTE(app, "/signUp").methods("POST"_method)([](const request& req) {
         auto reqJson = json::load(req.body);
