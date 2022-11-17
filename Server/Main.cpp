@@ -2,16 +2,18 @@
 #include <vector>
 #include <string>
 
+#include "./controllers/UserController.h"
+
 using namespace std;
 using namespace crow;
+using namespace controllers;
 
 int main() {
+
     vector<int> numbers = vector<int>();
     
-    SimpleApp app;
-
-
-
+    SimpleApp       app;
+    UserController  userController;
 
     CROW_ROUTE(app, "/")([&numbers]() {
         numbers.emplace_back(numbers.size());
@@ -23,9 +25,11 @@ int main() {
         return t;
     });
 
+    CROW_ROUTE(app, "/bomdia")([&userController]() {
+        userController.printable();
 
-
-
+        return "bomdia";
+    });
 
     CROW_ROUTE(app, "/signUp").methods("POST"_method)([](const request& req) {
         auto reqJson = json::load(req.body);
