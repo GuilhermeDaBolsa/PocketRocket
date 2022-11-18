@@ -1,10 +1,8 @@
 class User {
 public:
-	int id;
+	unsigned int id;
 	char* nickname;
-	char* login;
-	char* encrypted_password;
 
-	User(char* nickname, char* login, char* encrypted_password)
-		: nickname(nickname), login(login), encrypted_password(encrypted_password){}
+	User(unsigned int id, char* nickname)
+		: id(id), nickname(nickname){}
 };
