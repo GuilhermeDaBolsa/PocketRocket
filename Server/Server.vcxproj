@@ -146,6 +146,7 @@
   <ItemGroup>
     <ClCompile Include="Main.cpp" />
     <ClCompile Include="User.cpp" />
+    <ClCompile Include="UsersManager.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Crow_all.h" />

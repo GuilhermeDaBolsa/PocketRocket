@@ -1,8 +1,12 @@
+#pragma once
 class User {
 public:
-	unsigned int id;
-	char* nickname;
+	const unsigned int id;
+	const char* nickname;
 
-	User(unsigned int id, char* nickname)
+	User(const unsigned int id)
+		: id(id){}
+
+	User(const unsigned int id, const char* nickname)
 		: id(id), nickname(nickname){}
 };
