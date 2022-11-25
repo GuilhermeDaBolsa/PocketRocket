@@ -2,6 +2,7 @@
 
 #include "./controllers/UserController.h"
 #include "./UsersManager.cpp"
+#include "./RoomsManager.cpp"
 #include "./User.cpp"
 
 using namespace std;
@@ -13,6 +14,7 @@ int main() {
     App<CORSHandler>    app;
     UserController      userController;
     UsersManager        usersManager;
+    RoomsManager        roomsManager;
 
     auto& cors = app.get_middleware<CORSHandler>();
 
@@ -24,41 +26,65 @@ int main() {
 
     CROW_ROUTE(app, "/")([]() { return "Hello, world!"; });
 
-    CROW_ROUTE(app, "/host_room").methods("POST"_method)([&usersManager](const crow::request& req) {
+    CROW_ROUTE(app, "/host_room").methods("POST"_method)([&usersManager, &roomsManager](const crow::request& req) {
 
         auto reqJson = json::load(req.body);
 
         if (!reqJson)
             return response(status::BAD_REQUEST, "Missing request body");
 
-        
-        //1 - CREATE USER IF DOES NOT HAVE ONE YET
-        if (!reqJson.has("userId") || reqJson["userId"].t() != json::type::Number) {
-            User& newUser = usersManager.createUser("oswaldo");
+
+        // 1 - get / create user
+        User* user;
+
+        if (reqJson.has("userId") && reqJson["userId"].t() == json::type::Number) {
+
+            user = usersManager.getUser(reqJson["userId"].i());
+
+            if (user == nullptr)
+                return response(status::BAD_REQUEST, "User does not exist");
+
+            if ((*user).currentRoom != 0)
+                return response(status::BAD_REQUEST, "User is already in room");
 
         } else {
-            unsigned int userId = reqJson["userId"].i();
 
-            if(!usersManager.hasUser(userId))
-                return response(status::BAD_REQUEST, "User does not exist");
+            user = usersManager.createUser("oswaldo");
         }
 
 
-        //2 - CREATE ROOM
+        //2 - create new room
+        Room* newRoom = roomsManager.createRoom("salinha");
 
-        //3 - PUT USER INTO ROOM
+        //3 - put user in room
+        roomsManager.addUserInRoom(*user, *newRoom);
 
         //4 - OPEN SOCKET CONNECTION FOR THIS USER
 
         //5 - RETURN USER DATA (EX. ID), ROOM DATA??, SCOKET CONNECTION
         
+        /*vector<json::wvalue> rooms;
+        json::wvalue response;
         
-        
-        json::wvalue response = json::wvalue();
-        for (auto user : usersManager.usersList())
-            response[user.id] = user.nickname;
+        for (auto room : roomsManager.roomsList()) {
+            vector<json::wvalue> usersInRoom;
 
-        return crow::response(status::OK, response);
+            for (auto user : room.usersList()) {
+                json::wvalue a = {{"id", user.id}, {"nick",user.nickname}};
+                usersInRoom.emplace_back(a);
+            }
+
+            rooms.emplace_back(usersInRoom);
+        }
+            
+        response["rooms"] = std::move(roomsManager.roomsList());*/
+        
+        auto a = json::wvalue::list();
+
+        json::wvalue x({ {"bomdia", "asdas"}, {"serio", ""}});
+        x["serio"] = {1,2,3,4};
+            //return x;
+        return crow::response(status::OK, x);
     });
 
 

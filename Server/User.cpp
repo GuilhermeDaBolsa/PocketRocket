@@ -4,9 +4,9 @@ public:
 	const unsigned int id;
 	const char* nickname;
 
-	User(const unsigned int id)
-		: id(id){}
+	unsigned int currentRoom;
+
 
 	User(const unsigned int id, const char* nickname)
-		: id(id), nickname(nickname){}
+		: id(id), nickname(nickname), currentRoom(0){ }
 };

@@ -9,27 +9,23 @@ class UsersManager {
 	unsigned int nextUserId;	//THIS WAY OF MANAGE ID IS BAD
 
 public:
-	UsersManager() {
-		this->users = vector<User>();
-		this->nextUserId = 0;
-	}
+	UsersManager() 
+		: nextUserId(1) {} //1 is important ( 0 is none )
 
-	User& createUser(const char* nickname) {
-		User *newUser = new User(this->nextUserId, nickname);
-		this->users.push_back(*newUser);
-
+	User* createUser(const char* nickname) {
+		this->users.emplace_back(this->nextUserId, nickname);						//TODO SEE IF THIS WAY IS PERFORMANT (I THINK IT IS GETTING COPIED!!!!)
 		this->nextUserId += 1;
 
-		return *newUser;
+		return &this->users[this->users.size() - 1];
 	}
 
-	bool hasUser(const unsigned int userId) {
+	User* getUser(const unsigned int userId) {
 		for (int i = 0; i < this->users.size(); i++) {
 			if (this->users[i].id == userId)
-				return true;
+				return &this->users[i];
 		}
 
-		return false;
+		return nullptr;
 	}
 
 	const vector<User>& usersList() const {

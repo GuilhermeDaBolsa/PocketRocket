@@ -8,20 +8,23 @@ class Room {
 public:
 
 	unsigned int id;
-	size_t max_users;
-	vector<User> *users;
-	char* socketURI;		//THIS IS THE SOCKET URI THAT IS LISTENING... WHERE THE PLAYERS SHOULD CONNECT
+	const char* name;
+	unsigned int maxUsers;
+	vector<User> users;
 
-	//TODO: OPEN SOCKET CONNECTION HERE IN THE ROOM???
+	Room(unsigned int id, const char* name, unsigned int maxUsers)
+		: id(id), name(name), maxUsers(maxUsers) { }
 
-	Room(unsigned int id, size_t max_users, char* socketURI) {
-		this->id = id;
-		this->max_users = max_users;
-		this->socketURI = socketURI;
-		this->users = new vector<User>();
+	void addUser(User& user) {
+		user.currentRoom = this->id;
+		this->users.push_back(user); //TODO SEE IF THIS WAY IS PERFORMANT (I THINK IT IS GETTING COPIED!!!!)
 	}
 
-	void addUser(const User& user) {
-		this->users->push_back(user);
+	bool isFull() {
+		return this->users.size() == this->maxUsers;
+	}
+
+	const vector<User>& usersList() const {
+		return this->users;
 	}
 };
