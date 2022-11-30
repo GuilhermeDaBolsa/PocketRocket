@@ -3,7 +3,7 @@
 #include "./controllers/UserController.h"
 #include "./UsersManager.cpp"
 #include "./RoomsManager.cpp"
-#include "./User.cpp"
+#include "./Converter.cpp"
 
 using namespace std;
 using namespace crow;
@@ -63,28 +63,7 @@ int main() {
 
         //5 - RETURN USER DATA (EX. ID), ROOM DATA??, SCOKET CONNECTION
         
-        /*vector<json::wvalue> rooms;
-        json::wvalue response;
-        
-        for (auto room : roomsManager.roomsList()) {
-            vector<json::wvalue> usersInRoom;
-
-            for (auto user : room.usersList()) {
-                json::wvalue a = {{"id", user.id}, {"nick",user.nickname}};
-                usersInRoom.emplace_back(a);
-            }
-
-            rooms.emplace_back(usersInRoom);
-        }
-            
-        response["rooms"] = std::move(roomsManager.roomsList());*/
-        
-        auto a = json::wvalue::list();
-
-        json::wvalue x({ {"bomdia", "asdas"}, {"serio", ""}});
-        x["serio"] = {1,2,3,4};
-            //return x;
-        return crow::response(status::OK, x);
+        return crow::response(status::OK, Converter::toJson(*newRoom));
     });
 
 

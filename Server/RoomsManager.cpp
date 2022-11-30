@@ -17,7 +17,7 @@ public:
 		: nextRoomId(1) {} //1 is important ( 0 is none )
 
 	Room* createRoom(const char* roomName) {
-		this->rooms.emplace_back(this->nextRoomId, roomName, 4);					//TODO SEE IF THIS WAY IS PERFORMANT (I THINK IT IS GETTING COPIED!!!!)
+		this->rooms.emplace_back(this->nextRoomId, roomName, 4);
 		this->nextRoomId += 1;
 
 		return &this->rooms[this->rooms.size() - 1];

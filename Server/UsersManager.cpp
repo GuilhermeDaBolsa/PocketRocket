@@ -13,7 +13,7 @@ public:
 		: nextUserId(1) {} //1 is important ( 0 is none )
 
 	User* createUser(const char* nickname) {
-		this->users.emplace_back(this->nextUserId, nickname);						//TODO SEE IF THIS WAY IS PERFORMANT (I THINK IT IS GETTING COPIED!!!!)
+		this->users.emplace_back(this->nextUserId, nickname);
 		this->nextUserId += 1;
 
 		return &this->users[this->users.size() - 1];
