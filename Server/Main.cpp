@@ -26,43 +26,92 @@ int main() {
 
     CROW_ROUTE(app, "/")([]() { return "Hello, world!"; });
 
-    CROW_ROUTE(app, "/host_room").methods("POST"_method)([&usersManager, &roomsManager](const crow::request& req) {
+    CROW_ROUTE(app, "/create_user").methods("POST"_method)([&usersManager](const crow::request& req) {
+        User* user = usersManager.createUser("oswaldo");
+        return crow::response(status::OK, Converter::toJson(*user));
+    });
+
+    CROW_ROUTE(app, "/join_room").methods("GET"_method)([&usersManager, &roomsManager](const crow::request& req) {
 
         auto reqJson = json::load(req.body);
 
+        // 1 - Validate request body
         if (!reqJson)
             return response(status::BAD_REQUEST, "Missing request body");
 
+        if (!reqJson.has("userId") || reqJson["userId"].t() != json::type::Number)
+            return response(status::BAD_REQUEST, "Missing user");
 
-        // 1 - get / create user
-        User* user;
-
-        if (reqJson.has("userId") && reqJson["userId"].t() == json::type::Number) {
-
-            user = usersManager.getUser(reqJson["userId"].i());
-
-            if (user == nullptr)
-                return response(status::BAD_REQUEST, "User does not exist");
-
-            if ((*user).currentRoom != 0)
-                return response(status::BAD_REQUEST, "User is already in room");
-
-        } else {
-
-            user = usersManager.createUser("oswaldo");
-        }
+        if (!reqJson.has("roomId") || reqJson["roomId"].t() == json::type::Number)
+            return response(status::BAD_REQUEST, "Missing room");
 
 
-        //2 - create new room
+        // 2 - Get user
+        User* user = usersManager.getUser(reqJson["userId"].i());
+
+        if (user == nullptr)
+            return response(status::BAD_REQUEST, "User does not exist");
+
+        if ((*user).currentRoom != 0)
+            return response(status::BAD_REQUEST, "User is already in room");
+
+
+        // 3 - Get room
+        Room* room = roomsManager.getRoom(reqJson["roomId"].i());
+
+        if (room == nullptr)
+            return response(status::BAD_REQUEST, "Room does not exist");
+
+        if (room->isFull())
+            return response(status::BAD_REQUEST, "Room is full");
+
+        // 4 - put user in room
+        room->addUser(*user);
+
+        //5 - OPEN SOCKET CONNECTION FOR THIS USER
+
+        //6 - RETURN USER DATA (EX. ID), ROOM DATA??, SCOKET CONNECTION
+        return crow::response(status::OK, Converter::toJson(*room));
+    });
+
+    CROW_ROUTE(app, "/create_room").methods("POST"_method)([&usersManager, &roomsManager](const crow::request& req) {
+
+        auto reqJson = json::load(req.body);
+
+        // 1 - Validate request body
+        if (!reqJson)
+            return response(status::BAD_REQUEST, "Missing request body");
+
+        if (!reqJson.has("userId") || reqJson["userId"].t() != json::type::Number)
+            return response(status::BAD_REQUEST, "Missing user");
+
+        if (!reqJson.has("roomId") || reqJson["roomId"].t() == json::type::Number)
+            return response(status::BAD_REQUEST, "Missing room");
+
+
+        // 2 - Get user
+        User* user = usersManager.getUser(reqJson["userId"].i());
+
+        if (user == nullptr)
+            return response(status::BAD_REQUEST, "User does not exist");
+
+        if ((*user).currentRoom != 0)
+            return response(status::BAD_REQUEST, "User is already in room");
+
+
+        //3 - Create new room
         Room* newRoom = roomsManager.createRoom("salinha");
 
-        //3 - put user in room
-        roomsManager.addUserInRoom(*user, *newRoom);
+        if (newRoom->isFull())
+            return response(status::BAD_REQUEST, "Room is full");
 
-        //4 - OPEN SOCKET CONNECTION FOR THIS USER
+        //4 - put user in room
+        newRoom->addUser(*user);
 
-        //5 - RETURN USER DATA (EX. ID), ROOM DATA??, SCOKET CONNECTION
-        
+        //5 - OPEN SOCKET CONNECTION FOR THIS USER
+
+
+        //6 - RETURN USER DATA (EX. ID), ROOM DATA??, SCOKET CONNECTION
         return crow::response(status::OK, Converter::toJson(*newRoom));
     });
 

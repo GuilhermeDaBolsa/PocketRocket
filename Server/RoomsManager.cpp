@@ -23,15 +23,13 @@ public:
 		return &this->rooms[this->rooms.size() - 1];
 	}
 
-	//TODO i feel like there is something wrong with this method... idk... maybe it does a lot of things... maybe it shouldnt be here.. idk
-	//TODO SEARCH MORE ABOUT IF RETURNING CONST CHAR* IS OK FOR 'ERROR' VERIFYING OR IF IT SHOULD BE AN ENUM OR SOMETHING ELSE... (i dont like throwing things when its not a true error)
-	const char* addUserInRoom(User& user, Room& room) {
-		
-		if (room.isFull())
-			return "There is no more room in this room :T";
+	Room* getRoom(const unsigned int roomId) {
+		for (int i = 0; i < this->rooms.size(); i++) {
+			if (this->rooms[i].id == roomId)
+				return &this->rooms[i];
+		}
 
-		room.addUser(user);
-		return "";
+		return nullptr;
 	}
 
 	const vector<Room>& roomsList() const {
