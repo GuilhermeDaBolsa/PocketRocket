@@ -31,7 +31,7 @@ int main() {
         return crow::response(status::OK, Converter::toJson(*user));
     });
 
-    CROW_ROUTE(app, "/join_room").methods("GET"_method)([&usersManager, &roomsManager](const crow::request& req) {
+    CROW_ROUTE(app, "/join_room").methods("POST"_method)([&usersManager, &roomsManager](const crow::request& req) {
 
         auto reqJson = json::load(req.body);
 
@@ -42,7 +42,7 @@ int main() {
         if (!reqJson.has("userId") || reqJson["userId"].t() != json::type::Number)
             return response(status::BAD_REQUEST, "Missing user");
 
-        if (!reqJson.has("roomId") || reqJson["roomId"].t() == json::type::Number)
+        if (!reqJson.has("roomId") || reqJson["roomId"].t() != json::type::Number)
             return response(status::BAD_REQUEST, "Missing room");
 
 
@@ -85,7 +85,7 @@ int main() {
         if (!reqJson.has("userId") || reqJson["userId"].t() != json::type::Number)
             return response(status::BAD_REQUEST, "Missing user");
 
-        if (!reqJson.has("roomId") || reqJson["roomId"].t() == json::type::Number)
+        if (!reqJson.has("roomId") || reqJson["roomId"].t() != json::type::Number)
             return response(status::BAD_REQUEST, "Missing room");
 
 
