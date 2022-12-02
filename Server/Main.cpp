@@ -42,6 +42,7 @@ int main() {
 
         auto reqJson = json::load(req.body);
 
+
         // 1 - Validate request body
         if (!reqJson)
             return response(status::BAD_REQUEST, "Missing request body");
@@ -72,12 +73,12 @@ int main() {
         if (room->isFull())
             return response(status::BAD_REQUEST, "Room is full");
 
-        // 4 - put user in room
+
+        // 4 - Put user in room
         room->addUser(*user);
 
-        //5 - OPEN SOCKET CONNECTION FOR THIS USER
 
-        //6 - RETURN USER DATA (EX. ID), ROOM DATA??, SCOKET CONNECTION
+        // 5 - RETURN TODO: ROOM DATA??, SCOKET CONNECTION??
         return crow::response(status::OK, Converter::toJson(*room));
     });
 
@@ -85,15 +86,13 @@ int main() {
 
         auto reqJson = json::load(req.body);
 
+
         // 1 - Validate request body
         if (!reqJson)
             return response(status::BAD_REQUEST, "Missing request body");
 
         if (!reqJson.has("userId") || reqJson["userId"].t() != json::type::Number)
             return response(status::BAD_REQUEST, "Missing user");
-
-        if (!reqJson.has("roomId") || reqJson["roomId"].t() != json::type::Number)
-            return response(status::BAD_REQUEST, "Missing room");
 
 
         // 2 - Get user
@@ -106,22 +105,20 @@ int main() {
             return response(status::BAD_REQUEST, "User is already in room");
 
 
-        //3 - Create new room
+        // 3 - Create new room
         Room* newRoom = roomsManager.createRoom("salinha");
 
         if (newRoom->isFull())
             return response(status::BAD_REQUEST, "Room is full");
 
-        //4 - put user in room
+
+        // 4 - Put user in room
         newRoom->addUser(*user);
 
-        //5 - OPEN SOCKET CONNECTION FOR THIS USER
 
-
-        //6 - RETURN USER DATA (EX. ID), ROOM DATA??, SCOKET CONNECTION
+        // 5 - RETURN TODO: ROOM DATA??, SCOKET CONNECTION??
         return crow::response(status::OK, Converter::toJson(*newRoom));
     });
-
 
     
     CROW_ROUTE(app, "/bomdia").methods("GET"_method)(&userController.Print);
