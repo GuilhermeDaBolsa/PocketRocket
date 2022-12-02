@@ -1,3 +1,6 @@
+#include <cstdlib>
+#include <ctime>
+
 #include "Crow_all.h"
 
 #include "./controllers/UserController.h"
@@ -11,12 +14,16 @@ using namespace controllers;
 
 int main() {
 
-    App<CORSHandler>    app;
-    UserController      userController;
-    UsersManager        usersManager;
-    RoomsManager        roomsManager;
+    App<CORSHandler>                      app;
+    UserController                        userController;
+    UsersManager                          usersManager;
+    RoomsManager                          roomsManager;
+
+    vector<crow::websocket::connection*>   simpleRoom;
 
     auto& cors = app.get_middleware<CORSHandler>();
+
+    srand (static_cast <unsigned> (time(0)));
 
     cors
       .global()
@@ -122,12 +129,24 @@ int main() {
 
     CROW_WEBSOCKET_ROUTE(app, "/ws")
         .onopen([&](crow::websocket::connection& conn) {
+            // TODO: guardar as connection em uma sala
+            simpleRoom.emplace_back(&conn);
             CROW_LOG_INFO << "websocket connection is open: ";
         })
         .onclose([&](crow::websocket::connection& conn, const std::string& reason){
+            // TODO: remover conexão da lista de conexões da sala
             CROW_LOG_INFO << "websocket connection closed: " << reason;
         })
-        .onmessage([&](crow::websocket::connection& /*conn*/, const std::string& data, bool is_binary){
+        .onmessage([&](crow::websocket::connection& conn, const std::string& data, bool is_binary){
+            // TODO: lista de conexões[0].send_text() e conexões[1].send_text(); 
+            
+            float x = (static_cast <float> (rand()) / static_cast <float> (RAND_MAX)) * 500;
+            float y = (static_cast <float> (rand()) / static_cast <float> (RAND_MAX)) * 500;
+
+            for(auto conn : simpleRoom) {
+                conn->send_text(to_string(x)+","+to_string(y));    
+            }
+
             CROW_LOG_INFO << data << "< message data";
         });
 
