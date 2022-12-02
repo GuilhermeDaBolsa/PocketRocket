@@ -10,7 +10,7 @@ using namespace crow;
 
 class Converter {
 public:
-	//NOTE: CROW JSON SEEMS TO BE EXTREMELY POOR PERFORMANT... 
+	//NOTE: CROW JSON SEEMS TO BE EXTREMELY POOR PERFORMANT AT FIRST GLANCE... IT MAY NOT BE
 
 	static json::wvalue toJson(User& user) {
 		return json::wvalue({ {"id", user.id}, {"nickname", user.nickname}, {"currentRoom", user.currentRoom} });
