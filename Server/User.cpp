@@ -4,13 +4,13 @@
 class User {
 public:
 	const unsigned int id;
-	const char* nickname;
+	char* nickname;
 
 	unsigned int currentRoom;
 	crow::websocket::connection* connection;
 
 	User(const unsigned int id, const char* nickname)
-		: id(id), nickname(nickname), currentRoom(0){ }
+		: id(id), nickname((char*)nickname), currentRoom(0){ }
 
 	void setConnection(crow::websocket::connection& conn) {
 		this->connection = &conn;

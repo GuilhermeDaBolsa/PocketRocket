@@ -1,11 +1,11 @@
 #pragma once
-#include <vector>
+#include <list>
 #include "User.cpp"
 
 using namespace std;
 
 class UsersManager {
-	vector<User> users;
+	list<User> users;			//THIS IS NOW A LIST INSTEAD OF VECTOR BECAUSE https://www.reddit.com/r/cpp/comments/3xmpz9/holding_reference_or_pointer_of_a_vector_element/
 	unsigned int nextUserId;	//THIS WAY OF MANAGE ID IS BAD
 
 public:
@@ -16,19 +16,19 @@ public:
 		this->users.emplace_back(this->nextUserId, nickname);
 		this->nextUserId += 1;
 
-		return &this->users[this->users.size() - 1];
+		return &this->users.back();
 	}
 
 	User* getUser(const unsigned int userId) {
-		for (int i = 0; i < this->users.size(); i++) {
-			if (this->users[i].id == userId)
-				return &this->users[i];
+		for (auto& user : this->users) {
+			if (user.id == userId)
+				return &user;
 		}
 
 		return nullptr;
 	}
 
-	const vector<User>& usersList() const {
+	const list<User>& usersList() const {
 		return this->users;
 	}
 	

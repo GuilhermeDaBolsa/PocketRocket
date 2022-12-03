@@ -19,7 +19,7 @@ int main() {
     UsersManager        usersManager;
     RoomsManager        roomsManager;
 
-    queue<User*>        usersToBindConnection; //TODO MAYBE THERE IS A BETTER WAY TO DO THIS...
+    queue<User*>        usersToBindConnection;
 
     auto& cors = app.get_middleware<CORSHandler>();
 
@@ -33,9 +33,21 @@ int main() {
 
     CROW_ROUTE(app, "/")([]() { return "Hello, world!"; });
 
+    //TODO: ADD FILTERS TO THE get_rooms????
+    CROW_ROUTE(app, "/get_rooms").methods("GET"_method)([&roomsManager](const crow::request& req) {
+        auto roomsJson = vector<json::wvalue>();
+
+        auto rooms = roomsManager.roomsList();
+
+        for (auto& room : rooms)
+            roomsJson.emplace_back(Converter::basicRoomToJson(room));
+
+        return crow::response(status::OK, json::wvalue({ {"rooms", roomsJson} }));
+    });
+
     CROW_ROUTE(app, "/create_user").methods("POST"_method)([&usersManager](const crow::request& req) {
-        User* user = usersManager.createUser("oswaldo");
-        return crow::response(status::OK, Converter::toJson(*user));
+        User* user = usersManager.createUser(new char[] {'o', 's', 'w', 'a', 'l', 'd', 'o', 0});
+        return crow::response(status::OK, Converter::basicUserToJson(*user));
     });
 
     CROW_ROUTE(app, "/join_room").methods("POST"_method)([&usersManager, &roomsManager](const crow::request& req) {
@@ -79,7 +91,7 @@ int main() {
 
 
         // 5 - RETURN TODO: ROOM DATA??, SCOKET CONNECTION??
-        return crow::response(status::OK, Converter::toJson(*room));
+        return crow::response(status::OK, Converter::roomToJson(*room));
     });
 
     CROW_ROUTE(app, "/create_room").methods("POST"_method)([&usersManager, &roomsManager](const crow::request& req) {
@@ -106,7 +118,7 @@ int main() {
 
 
         // 3 - Create new room
-        Room* newRoom = roomsManager.createRoom("salinha");
+        Room* newRoom = roomsManager.createRoom(new char[] {'s', 'a', 'l', 'i', 'n', 'h', 'a', 0});
 
         if (newRoom->isFull())
             return response(status::BAD_REQUEST, "Room is full");
@@ -117,7 +129,7 @@ int main() {
 
 
         // 5 - RETURN TODO: ROOM DATA??, SCOKET CONNECTION??
-        return crow::response(status::OK, Converter::toJson(*newRoom));
+        return crow::response(status::OK, Converter::roomToJson(*newRoom));
     });
 
     
@@ -132,13 +144,17 @@ int main() {
             if(strUserId == nullptr)
                 return false;
 
-            int userId = atoi(strUserId);
+            int userId = Converter::toInt(strUserId); //TODO TESTARRRR SE TA CONVERTENDO CERTO
 
             User* user = usersManager.getUser(userId);
 
             if (user == nullptr)
                 return false;
 
+            /*
+            this usersToBindConnection was created hoping that there is no way that onaccept -> onopen
+            can finish faster than another onaccept -> onopen that was started earlier (TODO MAYBE THERE IS A BETTER WAY TO ASSIGN A CONNECTION TO A USER... BUT IDK)
+            */
             usersToBindConnection.push(user); //BY FVCK LEOZ
 
             return true;

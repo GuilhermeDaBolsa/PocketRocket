@@ -1,4 +1,4 @@
-#include <vector>
+#include <list>
 #include "Room.cpp"
 
 using namespace std;
@@ -6,7 +6,7 @@ using namespace std;
 class RoomsManager {
 
 private:
-	vector<Room> rooms;
+	list<Room> rooms;			//THIS IS NOW A LIST INSTEAD OF VECTOR BECAUSE https://www.reddit.com/r/cpp/comments/3xmpz9/holding_reference_or_pointer_of_a_vector_element/
 	unsigned int nextRoomId;	//THIS WAY OF MANAGE ID IS BAD
 
 	//TODO: CREATE A QUEUE FOR THE FUNCTIONS THAT THE ROOMSMANAGER SHOULD EXECUTE? (THINKING OF A MORE THREAD SAFE THING)
@@ -20,19 +20,19 @@ public:
 		this->rooms.emplace_back(this->nextRoomId, roomName, 4);
 		this->nextRoomId += 1;
 
-		return &this->rooms[this->rooms.size() - 1];
+		return &this->rooms.back();
 	}
 
 	Room* getRoom(const unsigned int roomId) {
-		for (int i = 0; i < this->rooms.size(); i++) {
-			if (this->rooms[i].id == roomId)
-				return &this->rooms[i];
+		for (auto& room : this->rooms) {
+			if (room.id == roomId)
+				return &room;
 		}
 
 		return nullptr;
 	}
 
-	const vector<Room>& roomsList() const {
+	const list<Room>& roomsList() const {
 		return this->rooms;
 	}
 
