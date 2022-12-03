@@ -10,6 +10,7 @@ public:
 	unsigned int id;
 	const char* name;
 	unsigned int maxUsers;
+	//TODO ADD SOCKET CONNECTION HERE? (I THINK IT IS A GOOD IDEA)
 	vector<User*> users;
 
 	Room(unsigned int id, const char* name, unsigned int maxUsers)
@@ -21,7 +22,7 @@ public:
 	}
 
 	bool isFull() {
-		return this->users.size() == this->maxUsers;
+		return this->users.size() >= this->maxUsers;
 	}
 
 	const vector<User*>& usersList() const {

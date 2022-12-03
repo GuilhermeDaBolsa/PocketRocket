@@ -14,12 +14,12 @@ using namespace controllers;
 
 int main() {
 
-    App<CORSHandler>                      app;
-    UserController                        userController;
-    UsersManager                          usersManager;
-    RoomsManager                          roomsManager;
+    App<CORSHandler>    app;
+    UserController      userController;
+    UsersManager        usersManager;
+    RoomsManager        roomsManager;
 
-    vector<crow::websocket::connection*>   simpleRoom;
+    queue<User*>        usersToBindConnection; //TODO MAYBE THERE IS A BETTER WAY TO DO THIS...
 
     auto& cors = app.get_middleware<CORSHandler>();
 
@@ -125,9 +125,27 @@ int main() {
     CROW_ROUTE(app, "/signUp").methods("POST"_method)(&userController.SignUp);
 
     CROW_WEBSOCKET_ROUTE(app, "/ws")
+        .onaccept([&](const crow::request& req, void** userdata) {
+
+            char* strUserId = req.url_params.get("userId");
+
+            if(strUserId == nullptr)
+                return false;
+
+            int userId = atoi(strUserId);
+
+            User* user = usersManager.getUser(userId);
+
+            if (user == nullptr)
+                return false;
+
+            usersToBindConnection.push(user); //BY FVCK LEOZ
+
+            return true;
+         })
         .onopen([&](crow::websocket::connection& conn) {
-            // TODO: guardar as connection em uma sala
-            simpleRoom.emplace_back(&conn);
+            usersToBindConnection.front()->setConnection(conn);
+            usersToBindConnection.pop();
             CROW_LOG_INFO << "websocket connection is open: ";
         })
         .onclose([&](crow::websocket::connection& conn, const std::string& reason){
@@ -136,12 +154,11 @@ int main() {
         })
         .onmessage([&](crow::websocket::connection& conn, const std::string& data, bool is_binary){
             // TODO: lista de conexões[0].send_text() e conexões[1].send_text(); 
-            
             float x = (static_cast <float> (rand()) / static_cast <float> (RAND_MAX)) * 500;
             float y = (static_cast <float> (rand()) / static_cast <float> (RAND_MAX)) * 500;
 
-            for(auto conn : simpleRoom) {
-                conn->send_text(to_string(x)+","+to_string(y));    
+            for(auto user : usersManager.usersList()) {
+                user.connection->send_text(to_string(x)+","+to_string(y));    
             }
 
             CROW_LOG_INFO << data << "< message data";
