@@ -174,7 +174,8 @@ int main() {
             float y = (static_cast <float> (rand()) / static_cast <float> (RAND_MAX)) * 500;
 
             for(auto user : usersManager.usersList()) {
-                user.connection->send_text(to_string(x)+","+to_string(y));    
+                if(user.connection != nullptr)
+                    user.connection->send_text(to_string(x)+","+to_string(y));    
             }
 
             CROW_LOG_INFO << data << "< message data";

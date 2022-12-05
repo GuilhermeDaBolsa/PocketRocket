@@ -10,7 +10,7 @@ public:
 	crow::websocket::connection* connection;
 
 	User(const unsigned int id, const char* nickname)
-		: id(id), nickname((char*)nickname), currentRoom(0){ }
+		: id(id), nickname((char*)nickname), connection(nullptr), currentRoom(0){ }
 
 	void setConnection(crow::websocket::connection& conn) {
 		this->connection = &conn;
