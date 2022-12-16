@@ -10,13 +10,13 @@ public:
 	unsigned int id;
 	char* name;
 	unsigned int maxUsers;
-	//TODO ADD SOCKET CONNECTION HERE? (I THINK IT IS A GOOD IDEA)
+	char* connectionRoute;
 	vector<User*> users;
 
-	Room(unsigned int id, const char* name, unsigned int maxUsers)
-		: id(id), name((char*)name), maxUsers(maxUsers) {
+	Room(unsigned int id, const char* name, unsigned int maxUsers, const char* connectionRoute)
+		: id(id), name((char*)name), maxUsers(maxUsers), connectionRoute((char*)connectionRoute){
 
-		this->users.reserve(maxUsers); //prevents vector realocation... idk if helps in this case
+		this->users.reserve(maxUsers); //prevents vector realocation... idk if helps with someting in this case
 	}
 
 	void addUser(User& user) {

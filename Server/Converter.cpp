@@ -30,7 +30,7 @@ public:
 		for (int i = 0; i < room.users.size(); i++)
 			users.emplace_back(basicUserToJson(*room.users[i]));
 
-		return json::wvalue({ {"id", room.id}, {"name", room.name}, {"maxUsers", room.maxUsers}, {"users", users}});
+		return json::wvalue({ {"id", room.id}, {"name", room.name}, {"maxUsers", room.maxUsers}, {"connectionRoute", room.connectionRoute}, {"users", users}});
 	}
 
 	static unsigned int toInt(const char* str) {
