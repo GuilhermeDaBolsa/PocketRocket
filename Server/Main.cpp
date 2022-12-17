@@ -13,7 +13,6 @@ using namespace crow;
 using namespace controllers;
 
 int main() {
-
     App<CORSHandler>    app;
     UserController      userController;
     UsersManager        usersManager;
@@ -21,24 +20,17 @@ int main() {
 
     queue<User*>        usersToBindConnection;
 
+    srand(static_cast <unsigned> (time(0)));
+
     auto& cors = app.get_middleware<CORSHandler>();
-
-    srand (static_cast <unsigned> (time(0)));
-
-    cors
-      .global()
-        .methods("POST"_method, "GET"_method)
-      .prefix("*")
-        .ignore();
+    cors.global().methods("POST"_method, "GET"_method).prefix("*").ignore();
 
     CROW_ROUTE(app, "/")([]() { return "Hello, world!"; });
 
-    //TODO: ADD FILTERS TO THE get_rooms????
     CROW_ROUTE(app, "/get_rooms").methods("GET"_method)([&roomsManager](const crow::request& req) {
-        auto roomsJson = vector<json::wvalue>();
-
         auto rooms = roomsManager.roomsList();
 
+        auto roomsJson = vector<json::wvalue>();
         for (auto& room : rooms)
             roomsJson.emplace_back(Converter::basicRoomToJson(room));
 
@@ -144,7 +136,7 @@ int main() {
             if(strUserId == nullptr)
                 return false;
 
-            int userId = Converter::toInt(strUserId); //TODO TESTARRRR SE TA CONVERTENDO CERTO
+            int userId = Converter::toInt(strUserId);
 
             User* user = usersManager.getUser(userId);
 
@@ -160,9 +152,9 @@ int main() {
             return true;
          })
         .onopen([&](crow::websocket::connection& conn) {
-            usersToBindConnection.front()->setConnection(conn);
+            usersToBindConnection.front()->userConnection.connect(conn);
             usersToBindConnection.pop();
-            CROW_LOG_INFO << "websocket connection is open: ";
+            CROW_LOG_INFO << "websocket connection established";
         })
         .onclose([&](crow::websocket::connection& conn, const std::string& reason){
             // TODO: remover conexão da lista de conexões da sala
@@ -170,13 +162,14 @@ int main() {
         })
         .onmessage([&](crow::websocket::connection& conn, const std::string& data, bool is_binary){
             // TODO: lista de conexões[0].send_text() e conexões[1].send_text(); 
-            float x = (static_cast <float> (rand()) / static_cast <float> (RAND_MAX)) * 500;
+            /*float x = (static_cast <float> (rand()) / static_cast <float> (RAND_MAX)) * 500;
             float y = (static_cast <float> (rand()) / static_cast <float> (RAND_MAX)) * 500;
 
-            for(auto user : usersManager.usersList()) {
-                if(user.connection != nullptr)
-                    user.connection->send_text(to_string(x)+","+to_string(y));    
-            }
+            for(auto& user : usersManager.usersList()) {
+                if (user.userConnection.connection != nullptr) //TODO IF USER DISCONNECTS, THE CONNECTION WILL BE FUCKED UP AND SERVER WILL CRASH
+                    user.userConnection.connection->send_text("just testing");
+                    //user.userConnection.connection->send_text(to_string(x)+","+to_string(y));
+            }*/
 
             CROW_LOG_INFO << data << "< message data";
         });

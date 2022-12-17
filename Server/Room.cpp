@@ -1,6 +1,7 @@
 #pragma once
 #include <vector>
 #include "User.cpp"
+#include "Game.cpp"
 
 using namespace std;
 
@@ -12,15 +13,18 @@ public:
 	unsigned int maxUsers;
 	char* connectionRoute;
 	vector<User*> users;
+	Game* game; //TODO FOR SOME REASON, IF GAME IS NOT A POINTER, THE ROOM CLASS BECOMES NOT COPIABLE OR NOT MOVABLE (IDK WHICH ONE)
 
 	Room(unsigned int id, const char* name, unsigned int maxUsers, const char* connectionRoute)
 		: id(id), name((char*)name), maxUsers(maxUsers), connectionRoute((char*)connectionRoute){
 
-		this->users.reserve(maxUsers); //prevents vector realocation... idk if helps with someting in this case
+		this->users.reserve(maxUsers);
+		this->game = new Game(&users);
 	}
 
 	void addUser(User& user) {
-		user.currentRoom = this->id;
+		user.currentRoom = this;
+		user.userConnection.waitConnection();
 		this->users.push_back(&user);
 	}
 

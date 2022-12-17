@@ -1,8 +1,7 @@
 #pragma once
-
+#include <vector>
 #include "Crow_all.h"
 
-#include <vector>
 #include "./User.cpp"
 #include "./Room.cpp"
 

@@ -144,9 +144,12 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="ConnectionStatus.cpp" />
     <ClCompile Include="Converter.cpp" />
+    <ClCompile Include="Game.cpp" />
     <ClCompile Include="Main.cpp" />
     <ClCompile Include="User.cpp" />
+    <ClCompile Include="UserConnection.cpp" />
     <ClCompile Include="UsersManager.cpp" />
   </ItemGroup>
   <ItemGroup>

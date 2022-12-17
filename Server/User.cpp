@@ -1,18 +1,16 @@
 #pragma once
-#include "Crow_all.h"
+#include "UserConnection.cpp"
+
+class Room; //Foward declaration so the compiler or pre-processor does not enter in a loop of includes
 
 class User {
 public:
 	const unsigned int id;
 	char* nickname;
 
-	unsigned int currentRoom;
-	crow::websocket::connection* connection;
+	Room* currentRoom;
+	UserConnection userConnection;
 
 	User(const unsigned int id, const char* nickname)
-		: id(id), nickname((char*)nickname), connection(nullptr), currentRoom(0){ }
-
-	void setConnection(crow::websocket::connection& conn) {
-		this->connection = &conn;
-	}
+		: id(id), nickname((char*)nickname), userConnection(UserConnection()), currentRoom(nullptr){ }
 };

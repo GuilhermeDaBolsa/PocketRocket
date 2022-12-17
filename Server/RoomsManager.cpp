@@ -1,3 +1,4 @@
+#pragma once
 #include <list>
 #include "Room.cpp"
 
@@ -17,7 +18,7 @@ public:
 		: nextRoomId(1) {} //1 is important ( 0 is none )
 
 	Room* createRoom(const char* roomName) {
-		this->rooms.emplace_back(this->nextRoomId, roomName, 4, "ws"); //ws should be in another place but hey ;)
+		this->rooms.emplace_back(this->nextRoomId, roomName, 2, "ws"); //ws should be in another place but hey ;)
 		this->nextRoomId += 1;
 
 		return &this->rooms.back();
