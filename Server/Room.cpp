@@ -1,5 +1,6 @@
 #pragma once
 #include <vector>
+#include <algorithm>
 #include "User.cpp"
 #include "Game.cpp"
 
@@ -26,6 +27,12 @@ public:
 		user.currentRoom = this;
 		user.userConnection.waitConnection();
 		this->users.push_back(&user);
+	}
+
+	void removeUser(User& user) {
+		user.userConnection.disconnect();
+		this->users.erase(std::remove(this->users.begin(), this->users.end(), &user), this->users.end()); //SHESH WTF IS THIS (JUST TO REMOVE?)
+		user.currentRoom = nullptr;
 	}
 
 	bool isFull() {

@@ -23,6 +23,7 @@ public:
 	}
 
 	void disconnect() {
+		this->connection->close();
 		this->connection = nullptr;
 		this->status = ConnectionStatus::NotConnected;
 	}

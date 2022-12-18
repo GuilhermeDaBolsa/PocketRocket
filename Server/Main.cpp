@@ -42,6 +42,31 @@ int main() {
         return crow::response(status::OK, Converter::basicUserToJson(*user));
     });
 
+    CROW_ROUTE(app, "/exit_room").methods("POST"_method)([&usersManager](const crow::request& req) {
+
+        auto reqJson = json::load(req.body);
+
+        // 1 - Validate request body
+        if (!reqJson)
+            return response(status::BAD_REQUEST, "Missing request body");
+
+        if (!reqJson.has("userId") || reqJson["userId"].t() != json::type::Number)
+            return response(status::BAD_REQUEST, "Missing user");
+
+        // 2 - Get user
+        User* user = usersManager.getUser(reqJson["userId"].i());
+
+        if (user == nullptr)
+            return response(status::BAD_REQUEST, "User does not exist");
+
+        if (user->currentRoom == nullptr)
+            return response(status::BAD_REQUEST, "User is not in room");
+
+        user->currentRoom->removeUser(*user);
+
+        return crow::response(status::OK);
+    });
+
     CROW_ROUTE(app, "/join_room").methods("POST"_method)([&usersManager, &roomsManager](const crow::request& req) {
 
         auto reqJson = json::load(req.body);
@@ -64,7 +89,7 @@ int main() {
         if (user == nullptr)
             return response(status::BAD_REQUEST, "User does not exist");
 
-        if ((*user).currentRoom != 0)
+        if (user->currentRoom != nullptr)
             return response(status::BAD_REQUEST, "User is already in room");
 
 
