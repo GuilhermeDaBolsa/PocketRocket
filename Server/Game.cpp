@@ -32,12 +32,11 @@ public:
 				auto& userConnection = this->users->at(i)->userConnection;
 
 				if (userConnection.status == ConnectionStatus::Connected && userConnection.connection != nullptr) {
-					userConnection.connection->send_text(to_string(x) + "," + to_string(y)); //TODO IF USER DISCONNECTS, THE CONNECTION WILL BE FUCKED UP AND SERVER WILL CRASH
+					userConnection.connection->send_text(to_string(x) + "," + to_string(y));
 				}
 			}
 
-			this_thread::sleep_for(chrono::milliseconds(500));
+			this_thread::sleep_for(chrono::milliseconds(100));
 		} while (true);
 	}
-
 };

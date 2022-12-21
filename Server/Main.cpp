@@ -38,7 +38,7 @@ int main() {
     });
 
     CROW_ROUTE(app, "/create_user").methods("POST"_method)([&usersManager](const crow::request& req) {
-        User* user = usersManager.createUser(new char[] {'o', 's', 'w', 'a', 'l', 'd', 'o', 0});
+        User* user = usersManager.createUser(new char[8] {'o', 's', 'w', 'a', 'l', 'd', 'o', 0});
         return crow::response(status::OK, Converter::basicUserToJson(*user));
     });
 
@@ -57,10 +57,10 @@ int main() {
         User* user = usersManager.getUser(reqJson["userId"].i());
 
         if (user == nullptr)
-            return response(status::BAD_REQUEST, "User does not exist");
+            return response(status::UNAUTHORIZED, "User does not exist");
 
         if (user->currentRoom == nullptr)
-            return response(status::BAD_REQUEST, "User is not in room");
+            return response(status::CONFLICT, "User is not in a room");
 
         user->currentRoom->removeUser(*user);
 
@@ -87,20 +87,20 @@ int main() {
         User* user = usersManager.getUser(reqJson["userId"].i());
 
         if (user == nullptr)
-            return response(status::BAD_REQUEST, "User does not exist");
+            return response(status::UNAUTHORIZED, "User does not exist");
 
         if (user->currentRoom != nullptr)
-            return response(status::BAD_REQUEST, "User is already in room");
+            return response(status::CONFLICT, "User is already in a room");
 
 
         // 3 - Get room
         Room* room = roomsManager.getRoom(reqJson["roomId"].i());
 
         if (room == nullptr)
-            return response(status::BAD_REQUEST, "Room does not exist");
+            return response(status::NOT_FOUND, "Room does not exist");
 
         if (room->isFull())
-            return response(status::BAD_REQUEST, "Room is full");
+            return response(status::FORBIDDEN, "Room is full");
 
 
         // 4 - Put user in room
@@ -128,17 +128,17 @@ int main() {
         User* user = usersManager.getUser(reqJson["userId"].i());
 
         if (user == nullptr)
-            return response(status::BAD_REQUEST, "User does not exist");
+            return response(status::UNAUTHORIZED, "User does not exist");
 
         if ((*user).currentRoom != 0)
-            return response(status::BAD_REQUEST, "User is already in room");
+            return response(status::CONFLICT, "User is already in a room");
 
 
         // 3 - Create new room
-        Room* newRoom = roomsManager.createRoom(new char[] {'s', 'a', 'l', 'i', 'n', 'h', 'a', 0});
+        Room* newRoom = roomsManager.createRoom(new char[8] {'s', 'a', 'l', 'i', 'n', 'h', 'a', 0});
 
         if (newRoom->isFull())
-            return response(status::BAD_REQUEST, "Room is full");
+            return response(status::FORBIDDEN, "Room is full");
 
 
         // 4 - Put user in room
@@ -182,6 +182,16 @@ int main() {
             CROW_LOG_INFO << "websocket connection established";
         })
         .onclose([&](crow::websocket::connection& conn, const std::string& reason){
+            //TODO NÃO FUNCIONA ISSO AQUI ABAIXO
+            auto& users = usersManager.usersList();
+
+            for (User& user : users) {
+                if (user.userConnection.connection->get_remote_ip() == conn.get_remote_ip()) {
+                    user.currentRoom->removeUser(user);
+                    break;
+                }
+            }
+
             // TODO: remover conexão da lista de conexões da sala
             CROW_LOG_INFO << "websocket connection closed: " << reason;
         })

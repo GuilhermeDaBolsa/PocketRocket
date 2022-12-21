@@ -28,7 +28,7 @@ public:
 		return nullptr;
 	}
 
-	const list<User>& usersList() const {
+	list<User>& usersList() {
 		return this->users;
 	}
 	
