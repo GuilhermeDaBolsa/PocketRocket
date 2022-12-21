@@ -64,7 +64,7 @@ int main() {
 
         user->currentRoom->removeUser(*user);
 
-        return crow::response(status::OK);
+        return crow::response(status::OK, json::wvalue());
     });
 
     CROW_ROUTE(app, "/join_room").methods("POST"_method)([&usersManager, &roomsManager](const crow::request& req) {
@@ -182,15 +182,15 @@ int main() {
             CROW_LOG_INFO << "websocket connection established";
         })
         .onclose([&](crow::websocket::connection& conn, const std::string& reason){
-            //TODO NÃO FUNCIONA ISSO AQUI ABAIXO
-            auto& users = usersManager.usersList();
+            //TODO NÃO FUNCIONA ISSO AQUI ABAIXO E TAMBÈM CONFLITA COM A ROTA DO EXIT_ROOM (A CONNECTION VAI ESTAR NULLPTR)
+            /*auto& users = usersManager.usersList();
 
             for (User& user : users) {
                 if (user.userConnection.connection->get_remote_ip() == conn.get_remote_ip()) {
                     user.currentRoom->removeUser(user);
                     break;
                 }
-            }
+            }*/
 
             // TODO: remover conexão da lista de conexões da sala
             CROW_LOG_INFO << "websocket connection closed: " << reason;
