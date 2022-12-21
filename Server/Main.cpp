@@ -50,8 +50,11 @@ int main() {
         if (!reqJson)
             return response(status::BAD_REQUEST, "Missing request body");
 
-        if (!reqJson.has("userId") || reqJson["userId"].t() != json::type::Number)
+        if (!reqJson.has("userId"))
             return response(status::BAD_REQUEST, "Missing user");
+
+        if(reqJson["userId"].t() != json::type::Number)
+            return response(status::UNAUTHORIZED, "Not logged in");
 
         // 2 - Get user
         User* user = usersManager.getUser(reqJson["userId"].i());
@@ -76,8 +79,11 @@ int main() {
         if (!reqJson)
             return response(status::BAD_REQUEST, "Missing request body");
 
-        if (!reqJson.has("userId") || reqJson["userId"].t() != json::type::Number)
+        if (!reqJson.has("userId"))
             return response(status::BAD_REQUEST, "Missing user");
+
+        if (reqJson["userId"].t() != json::type::Number)
+            return response(status::UNAUTHORIZED, "Not logged in");
 
         if (!reqJson.has("roomId") || reqJson["roomId"].t() != json::type::Number)
             return response(status::BAD_REQUEST, "Missing room");
@@ -107,7 +113,7 @@ int main() {
         room->addUser(*user);
 
 
-        // 5 - RETURN TODO: ROOM DATA??, SCOKET CONNECTION??
+        // 5 - Return room info
         return crow::response(status::OK, Converter::roomToJson(*room));
     });
 
@@ -120,8 +126,11 @@ int main() {
         if (!reqJson)
             return response(status::BAD_REQUEST, "Missing request body");
 
-        if (!reqJson.has("userId") || reqJson["userId"].t() != json::type::Number)
+        if (!reqJson.has("userId"))
             return response(status::BAD_REQUEST, "Missing user");
+
+        if (reqJson["userId"].t() != json::type::Number)
+            return response(status::UNAUTHORIZED, "Not logged in");
 
 
         // 2 - Get user
@@ -145,7 +154,7 @@ int main() {
         newRoom->addUser(*user);
 
 
-        // 5 - RETURN TODO: ROOM DATA??, SCOKET CONNECTION??
+        // 5 - Return room info
         return crow::response(status::OK, Converter::roomToJson(*newRoom));
     });
 
