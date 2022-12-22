@@ -32,7 +32,7 @@ public:
 				auto& userConnection = this->users->at(i)->userConnection;
 
 				if (userConnection.status == ConnectionStatus::Connected && userConnection.connection != nullptr) {
-					userConnection.connection->send_text(to_string(x) + "," + to_string(y));
+					//userConnection.connection->send_text(to_string(x) + "," + to_string(y));
 				}
 			}
 

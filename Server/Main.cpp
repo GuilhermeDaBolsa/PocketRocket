@@ -121,7 +121,6 @@ int main() {
 
         auto reqJson = json::load(req.body);
 
-
         // 1 - Validate request body
         if (!reqJson)
             return response(status::BAD_REQUEST, "Missing request body");
@@ -158,67 +157,77 @@ int main() {
         return crow::response(status::OK, Converter::roomToJson(*newRoom));
     });
 
-    
-    CROW_ROUTE(app, "/bomdia").methods("GET"_method)(&userController.Print);
-    CROW_ROUTE(app, "/signUp").methods("POST"_method)(&userController.SignUp);
+    //CROW_ROUTE(app, "/signUp").methods("POST"_method)(&userController.SignUp);
 
     CROW_WEBSOCKET_ROUTE(app, "/ws")
-        .onaccept([&](const crow::request& req, void** userdata) {
+    .onaccept([&](const crow::request& req, void** userdata) {
 
-            char* strUserId = req.url_params.get("userId");
+        char* strUserId = req.url_params.get("userId");
 
-            if(strUserId == nullptr)
-                return false;
+        if(strUserId == nullptr)
+            return false;
 
-            int userId = Converter::toInt(strUserId);
+        int userId = Converter::toInt(strUserId);
 
-            User* user = usersManager.getUser(userId);
+        User* user = usersManager.getUser(userId);
 
-            if (user == nullptr)
-                return false;
+        if (user == nullptr)
+            return false;
 
-            /*
-            this usersToBindConnection was created hoping that there is no way that onaccept -> onopen
-            can finish faster than another onaccept -> onopen that was started earlier (TODO MAYBE THERE IS A BETTER WAY TO ASSIGN A CONNECTION TO A USER... BUT IDK)
-            */
-            usersToBindConnection.push(user); //BY FVCK LEOZ
+        /*
+        this usersToBindConnection was created hoping that there is no way that onaccept -> onopen
+        can finish faster than another onaccept -> onopen that was started earlier (TODO MAYBE THERE IS A BETTER WAY TO ASSIGN A CONNECTION TO A USER... BUT IDK)
+        */
+        usersToBindConnection.push(user); //BY FVCK LEOZ
 
-            return true;
-         })
-        .onopen([&](crow::websocket::connection& conn) {
-            usersToBindConnection.front()->userConnection.connect(conn);
-            usersToBindConnection.pop();
-            CROW_LOG_INFO << "websocket connection established";
+        return true;
         })
-        .onclose([&](crow::websocket::connection& conn, const std::string& reason){
-            //TODO NÃO FUNCIONA ISSO AQUI ABAIXO E TAMBÈM CONFLITA COM A ROTA DO EXIT_ROOM (A CONNECTION VAI ESTAR NULLPTR)
-            /*auto& users = usersManager.usersList();
+    .onopen([&](crow::websocket::connection& conn) {
+        usersToBindConnection.front()->userConnection.connect(conn);
+        usersToBindConnection.pop();
+        CROW_LOG_INFO << "websocket connection established";
+    })
+    .onclose([&](crow::websocket::connection& conn, const std::string& reason){
+        //TODO NÃO FUNCIONA ISSO AQUI ABAIXO E TAMBÈM CONFLITA COM A ROTA DO EXIT_ROOM (A CONNECTION VAI ESTAR NULLPTR)
+        /*auto& users = usersManager.usersList();
 
-            for (User& user : users) {
-                if (user.userConnection.connection->get_remote_ip() == conn.get_remote_ip()) {
-                    user.currentRoom->removeUser(user);
-                    break;
-                }
-            }*/
+        for (User& user : users) {
+            if (user.userConnection.connection->get_remote_ip() == conn.get_remote_ip()) {
+                user.currentRoom->removeUser(user);
+                break;
+            }
+        }*/
 
-            // TODO: remover conexão da lista de conexões da sala
-            CROW_LOG_INFO << "websocket connection closed: " << reason;
+        // TODO: remover conexão da lista de conexões da sala
+        CROW_LOG_INFO << "websocket connection closed: " << reason;
         })
-        .onmessage([&](crow::websocket::connection& conn, const std::string& data, bool is_binary){
-            // TODO: lista de conexões[0].send_text() e conexões[1].send_text(); 
-            /*float x = (static_cast <float> (rand()) / static_cast <float> (RAND_MAX)) * 500;
-            float y = (static_cast <float> (rand()) / static_cast <float> (RAND_MAX)) * 500;
+    .onmessage([&](crow::websocket::connection& conn, const std::string& data, bool is_binary) {
+        // TODO: PRECISAMOS OTIMIZAR ESTE MÉTODO
+        std::string delimiter = ",";
+        std::string message = data;
 
-            for(auto& user : usersManager.usersList()) {
-                if (user.userConnection.connection != nullptr) //TODO IF USER DISCONNECTS, THE CONNECTION WILL BE FUCKED UP AND SERVER WILL CRASH
-                    user.userConnection.connection->send_text("just testing");
-                    //user.userConnection.connection->send_text(to_string(x)+","+to_string(y));
-            }*/
+        size_t pos = message.find(delimiter);
+        int roomId = stoi(message.substr(0, pos));
+        message.erase(0, pos + delimiter.length());
 
-            CROW_LOG_INFO << data << "< message data";
-        });
+        pos = message.find(delimiter);
+        std::string posX = message.substr(0, pos);
+        message.erase(0, pos + delimiter.length());
 
-    app.port(8080).run(); // REMOVED MULTITHREAD FOR NOW...
+        std::string posY = message;
+
+        Room* room = roomsManager.getRoom(roomId);
+
+        for (auto user : room->usersList()) {
+            if (user->userConnection.status == ConnectionStatus::Connected && user->userConnection.connection != nullptr) {
+                user->userConnection.connection->send_text(posX + "," + posY);
+            }
+        }
+
+        CROW_LOG_INFO << data << "< message data";
+    });
+
+    app.port(8080).run();
 
     return 0;
 }

@@ -39,7 +39,7 @@ public:
 		return this->users.size() >= this->maxUsers;
 	}
 
-	const vector<User*>& usersList() const {
+	vector<User*>& usersList() {
 		return this->users;
 	}
 };
