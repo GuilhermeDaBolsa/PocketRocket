@@ -39,6 +39,22 @@ public:
 		return this->users.size() >= this->maxUsers;
 	}
 
+	void sendMessageToAllUsers(const std::string& text) {
+		for (int i = 0; i < this->users.size(); i++) {
+			auto& userConnection = this->users.at(i)->userConnection;
+
+			if (userConnection.status == ConnectionStatus::Connected &&
+				userConnection.connection != nullptr) {
+
+				userConnection.connection->send_text(text);
+			}
+		}
+	}
+
+	void notifyUsersOfNewPlayer(unsigned int userId) {
+		this->sendMessageToAllUsers((std::string)"P" + to_string(userId));
+	}
+
 	vector<User*>& usersList() {
 		return this->users;
 	}

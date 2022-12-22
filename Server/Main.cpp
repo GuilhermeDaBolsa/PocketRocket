@@ -111,6 +111,7 @@ int main() {
 
         // 4 - Put user in room
         room->addUser(*user);
+        room->notifyUsersOfNewPlayer(user->id);
 
 
         // 5 - Return room info
@@ -206,7 +207,7 @@ int main() {
 
         for (User& user : users) {
             if (user.userConnection.connection != nullptr 
-            && user.userConnection.connection->get_remote_ip() == conn.get_remote_ip()) {
+            && user.userConnection.connection->get_remote_ip() == conn.get_remote_ip()) { //TODO 2 CLIENTS LOCAIS TEM O MESMO IP...........
                 
                 user.player.setInput(&data);
                 break;
