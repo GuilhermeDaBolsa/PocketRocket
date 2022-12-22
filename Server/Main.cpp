@@ -200,31 +200,18 @@ int main() {
 
         // TODO: remover conexão da lista de conexões da sala
         CROW_LOG_INFO << "websocket connection closed: " << reason;
-        })
+    })
     .onmessage([&](crow::websocket::connection& conn, const std::string& data, bool is_binary) {
-        // TODO: PRECISAMOS OTIMIZAR ESTE MÉTODO
-        std::string delimiter = ",";
-        std::string message = data;
+        auto& users = usersManager.usersList();
 
-        size_t pos = message.find(delimiter);
-        int roomId = stoi(message.substr(0, pos));
-        message.erase(0, pos + delimiter.length());
-
-        pos = message.find(delimiter);
-        std::string posX = message.substr(0, pos);
-        message.erase(0, pos + delimiter.length());
-
-        std::string posY = message;
-
-        Room* room = roomsManager.getRoom(roomId);
-
-        for (auto user : room->usersList()) {
-            if (user->userConnection.status == ConnectionStatus::Connected && user->userConnection.connection != nullptr) {
-                user->userConnection.connection->send_text(posX + "," + posY);
+        for (User& user : users) {
+            if (user.userConnection.connection != nullptr 
+            && user.userConnection.connection->get_remote_ip() == conn.get_remote_ip()) {
+                
+                user.player.setInput(&data);
+                break;
             }
         }
-
-        CROW_LOG_INFO << data << "< message data";
     });
 
     app.port(8080).run();
